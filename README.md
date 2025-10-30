@@ -1,0 +1,1 @@
+# AI-Agents-on-Arc-with-USDC-Hackthone
