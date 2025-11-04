@@ -81,7 +81,7 @@ def generate_ciphertext(secret_hex, api_key=API_KEY):
 # -------------------------------------------------------------------
 # Create Wallet Set
 # -------------------------------------------------------------------
-def create_wallet_set(api_key=API_KEY, entity_secret_ciphertext=None, name="Set 1"):
+def create_wallet_set(api_key=API_KEY, entity_secret_ciphertext=None, name=None):
     url = f"{BASE_URL}/walletSets"
     payload = {
         "entitySecretCiphertext": entity_secret_ciphertext,
@@ -100,7 +100,7 @@ def create_wallet_set(api_key=API_KEY, entity_secret_ciphertext=None, name="Set 
 # -------------------------------------------------------------------
 # 5. Create Wallet(s)
 # -------------------------------------------------------------------
-def create_wallets(wallet_set_id, api_key=API_KEY, entity_secret_ciphertext=None, count=2):
+def create_wallets(wallet_set_id, api_key=API_KEY, entity_secret_ciphertext=None, count=None):
     url = f"{BASE_URL}/wallets"
     payload = {
         "idempotencyKey": str(uuid.uuid4()),

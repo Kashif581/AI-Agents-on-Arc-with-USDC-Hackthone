@@ -12,8 +12,8 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 
 # --- Import Tools ---
 from wallet_tools import (
-    tool_generate_secret,
-    tool_generate_ciphertext,
+    # tool_generate_secret,
+    # tool_generate_ciphertext,
     tool_create_wallet_set,
     tool_create_wallets,
     tool_list_wallets,
@@ -27,8 +27,8 @@ class WalletState(TypedDict):
 
 # --- LLM + Tools Setup ---
 tools = [
-    tool_generate_secret,
-    tool_generate_ciphertext,
+    # tool_generate_secret,
+    # tool_generate_ciphertext,
     tool_create_wallet_set,
     tool_create_wallets,
     tool_list_wallets,
