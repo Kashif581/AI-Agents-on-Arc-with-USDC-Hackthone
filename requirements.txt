@@ -1,0 +1,18 @@
+# Core dependencies
+python-dotenv
+requests
+uuid
+
+# LLM and agent framework
+langchain-core
+langchain-groq
+langgraph
+langchain-community
+
+# Voice support (speech-to-text + text-to-speech)
+SpeechRecognition
+pyaudio
+elevenlabs
+
+# Streamlit for web app deployment
+streamlit
