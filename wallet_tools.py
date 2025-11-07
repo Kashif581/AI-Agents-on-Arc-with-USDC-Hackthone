@@ -1,6 +1,5 @@
 from langchain_core.tools import tool
 from wallet_functions import (
-    generate_secret,
     generate_ciphertext,
     create_wallet_set,
     create_wallets,
@@ -9,6 +8,8 @@ from wallet_functions import (
     get_wallet_balance,
     transfer_token,
     get_transaction_status,
+    update_env,
+    get_wallet_info_by_name,
 )
 import os
 from dotenv import load_dotenv
@@ -17,25 +18,9 @@ load_dotenv()
 
 # ------------------ Wrappers ------------------
 
-# @tool
-# def tool_generate_secret():
-#     """Generate a new 32-byte random secret for Circle API."""
-#     secret = generate_secret()
-#     os.environ["ENTITY_SECRET"] = secret
-#     update_env("ENTITY_SECRET", secret)
-#     return f"New secret generated and stored in .env: {secret}"
-
-# @tool
-# def tool_generate_ciphertext():
-#     """Encrypt the entity secret using Circle public key."""
-#     secret = os.getenv("ENTITY_SECRET")
-#     ciphertext = generate_ciphertext(secret)
-#     os.environ["ENTITY_SECRET_CIPHERTEXT"] = ciphertext
-#     update_env("ENTITY_SECRET_CIPHERTEXT", ciphertext)
-#     return "Entity secret encrypted and ciphertext stored in .env."
 
 @tool
-def tool_create_wallet_set(name: str = "My Wallet Set"):
+def tool_create_wallet_set(name: str):
     """Create a new wallet set on Circle."""
     
     # from wallet_functions import create_wallet_set
@@ -52,12 +37,13 @@ def tool_create_wallet_set(name: str = "My Wallet Set"):
     # return f"Wallet set '{name}' created with ID {wallet_set_id}"
 
 @tool
-def tool_create_wallets(count: int = 2):
-    """Create multiple wallets in the existing wallet set."""
+def tool_create_wallets(count: int, wallet_names: list[str]):
+    """Create multiple wallets in the wallet set with user-provided names."""
     wallet_set_id = os.getenv("WALLET_SET_ID")
     secret = os.getenv("ENTITY_SECRET")
     ciphertext = generate_ciphertext(secret)
-    response = create_wallets(wallet_set_id, entity_secret_ciphertext=ciphertext, count=count)
+    # wallet_names = ["Electricity", "Gas", "Water"]
+    response = create_wallets(wallet_set_id, entity_secret_ciphertext=ciphertext, wallet_names=wallet_names)
     wallet_ids = [w["id"] for w in response["data"]["wallets"]]
     wallet_adr = [w["address"] for w in response["data"]["wallets"]]
     print(wallet_ids)
@@ -76,11 +62,22 @@ def tool_list_wallets():
     return response
 
 @tool
-def tool_transfer_token(wallet_id: str, destination_address: str, amount: str = "1.0"):
+def tool_transfer_token(from_wallet_name: str, to_wallet_name: str, amount: str, token_id: str):
     """Transfer USDC token between wallets."""
+    from_wallet = get_wallet_info_by_name(from_wallet_name)
+    to_wallet = get_wallet_info_by_name(to_wallet_name)
+    if not from_wallet or not to_wallet:
+        return f"Could not find one or both wallet names in .env."
+    
     secret = os.getenv("ENTITY_SECRET")
     ciphertext = generate_ciphertext(secret)
-    response = transfer_token(wallet_id, entity_secret_ciphertext=ciphertext, destination_address=destination_address, amount=amount)
+    response = transfer_token(
+        wallet_id=from_wallet["wallet_id"], 
+        entity_secret_ciphertext=ciphertext, 
+        destination_address=to_wallet["wallet_address"], 
+        amount=amount, 
+        token_id="5042002"
+        )
     return response
 
 @tool
@@ -89,11 +86,7 @@ def tool_get_wallet_balance(wallet_id: str):
     return get_wallet_balance(wallet_id)
 
 
-def update_env(key: str, value: str):
-    """Update .env file with a key=value pair."""
-    with open(".env", "a") as f:
-        f.write(f"\n{key}={value}")
-    return f"{key}={value} added to .env"
+
 
 
 

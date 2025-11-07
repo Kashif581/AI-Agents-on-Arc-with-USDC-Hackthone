@@ -100,15 +100,15 @@ def create_wallet_set(api_key=API_KEY, entity_secret_ciphertext=None, name=None)
 # -------------------------------------------------------------------
 # 5. Create Wallet(s)
 # -------------------------------------------------------------------
-def create_wallets(wallet_set_id, api_key=API_KEY, entity_secret_ciphertext=None, count=None):
+def create_wallets(wallet_set_id, api_key=API_KEY, entity_secret_ciphertext=None, wallet_names=None):
     url = f"{BASE_URL}/wallets"
     payload = {
         "idempotencyKey": str(uuid.uuid4()),
         "entitySecretCiphertext": entity_secret_ciphertext,
         "accountType": "SCA",
         "blockchains": ["ARC-TESTNET"],
-        "count": count,
-        "metadata": [{"name":"User"},{"name":"Electricity"}],
+        "count": len(wallet_names),
+        "metadata": [{"name": name} for name in wallet_names],
         "walletSetId": wallet_set_id
     }
     headers = {
@@ -161,7 +161,7 @@ def get_wallet_balance(wallet_id, api_key=API_KEY):
 # -------------------------------------------------------------------
 # Transfer Token between Wallets
 # -------------------------------------------------------------------
-def transfer_token(wallet_id, entity_secret_ciphertext=None, destination_address=None, token_id=None, api_key=API_KEY, amount="2.0"):
+def transfer_token(wallet_id, entity_secret_ciphertext=None, destination_address=None, token_id=None, api_key=API_KEY, amount=None):
     if not wallet_id:
         raise ValueError("wallet_id is required")
     if not destination_address:
@@ -200,6 +200,32 @@ def get_transaction_status(transaction_id, api_key=API_KEY):
     response = requests.get(url, headers=headers)
     print("Transaction Details:", response.json())
     return response.json()
+
+
+
+def update_env(key: str, value: str):
+    """Update .env file with a key=value pair."""
+    with open(".env", "a") as f:
+        f.write(f"\n{key}={value}")
+    return f"{key}={value} added to .env"
+
+
+def get_wallet_info_by_name(wallet_name):
+    """Fetch wallet ID and address from .env by name."""
+    from dotenv import dotenv_values
+    env_vars = dotenv_values(".env")
+    
+    for i in range(1, 10):  # assuming you won't have more than 10 wallets
+        name_key = f"WALLET_NAME_{i}"
+        id_key = f"WALLET_ID_{i}"
+        addr_key = f"WALLET_ADDRESS_{i}"
+        
+        if env_vars.get(name_key) and env_vars[name_key].lower() == wallet_name.lower():
+            return {
+                "wallet_id": env_vars[id_key],
+                "wallet_address": env_vars[addr_key]
+            }
+    return None
 
 
 
