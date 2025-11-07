@@ -37,7 +37,7 @@ def tool_create_wallet_set(name: str):
     # return f"Wallet set '{name}' created with ID {wallet_set_id}"
 
 @tool
-def tool_create_wallets(count: int, wallet_names: list):
+def tool_create_wallets(count: int, wallet_names: list[str]):
     """Create multiple wallets in the wallet set with user-provided names."""
     wallet_set_id = os.getenv("WALLET_SET_ID")
     secret = os.getenv("ENTITY_SECRET")
