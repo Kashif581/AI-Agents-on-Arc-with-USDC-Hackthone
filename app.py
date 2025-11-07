@@ -14,7 +14,7 @@ from wallet_tools import (
 # --- Initialize LLM ---
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-pro",
-    google_api_key="AIzaSyC9byMTit8Aaf7-QvocH9SWj1eVxRN8pjE"
+    google_api_key=""
 )
 
 
