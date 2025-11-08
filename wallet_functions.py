@@ -2,23 +2,21 @@ import os
 import uuid
 import base64
 import requests
-import json
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
-from dotenv import load_dotenv
+import streamlit as st
 
-
-load_dotenv()
+API_KEY = st.session_state.get("CIRCLE_API_KEY")
 
 
 # Load environment variables
-API_KEY = os.getenv("API_KEY")
-ENTITY_SECRET_ENV = os.getenv("ENTITY_SECRET")
-WALLET_SET_ID_ENV = os.getenv("WALLET_SET_ID")
-WALLET_ID_1_ENV = os.getenv("WALLET_ID_1")
-WALLET_ADDRESS_2_ENV = os.getenv("WALLET_ADDRESS_2")
-USDC_TOKEN_ID_ENV = os.getenv("USDC_TOKEN_ID")
+# API_KEY = os.getenv("API_KEY")
+# ENTITY_SECRET_ENV = os.getenv("ENTITY_SECRET")
+# WALLET_SET_ID_ENV = os.getenv("WALLET_SET_ID")
+# WALLET_ID_1_ENV = os.getenv("WALLET_ID_1")
+# WALLET_ADDRESS_2_ENV = os.getenv("WALLET_ADDRESS_2")
+# USDC_TOKEN_ID_ENV = os.getenv("USDC_TOKEN_ID")
 BASE_URL = "https://api.circle.com/v1/w3s/developer"
 
 
@@ -44,13 +42,13 @@ def fetch_public_key(api_key=API_KEY):
 # -------------------------------------------------------------------
 # Generate ciphertext (RSA-OAEP encrypt the secret)
 # -------------------------------------------------------------------
-def generate_ciphertext(secret_hex, api_key=API_KEY):
-    if not secret_hex:
+def generate_ciphertext(secret, api_key=API_KEY):
+    if not secret:
         raise ValueError("secret_hext must be provided to generate ciphertext.")
     
     try:
     # Convert hex secret to bytes
-        entity_secret_bytes = bytes.fromhex(secret_hex)
+        entity_secret_bytes = bytes.fromhex(secret)
     except Exception as e:
         raise ValueError("Invalid secret_hex (must be hex string)") from e
 
@@ -161,13 +159,13 @@ def get_wallet_balance(wallet_id, api_key=API_KEY):
 # -------------------------------------------------------------------
 # Transfer Token between Wallets
 # -------------------------------------------------------------------
-def transfer_token(wallet_id, entity_secret_ciphertext=None, destination_address=None, token_id=None, api_key=API_KEY, amount=None):
+def transfer_token(wallet_id, entity_secret_ciphertext=None, destination_address=None, token_id="15dc2b5d-0994-58b0-bf8c-3a0501148ee8", api_key=API_KEY, amount=None):
     if not wallet_id:
         raise ValueError("wallet_id is required")
     if not destination_address:
         raise ValueError("destination_address is required")
     # use provided token_id or environment fallback
-    token_id = token_id or USDC_TOKEN_ID_ENV
+    token_id = token_id
     if not token_id:
         raise ValueError("token_id must be provided (or set in env USDC_TOKEN_ID)")
     
@@ -201,13 +199,6 @@ def get_transaction_status(transaction_id, api_key=API_KEY):
     print("Transaction Details:", response.json())
     return response.json()
 
-
-
-def update_env(key: str, value: str):
-    """Update .env file with a key=value pair."""
-    with open(".env", "a") as f:
-        f.write(f"\n{key}={value}")
-    return f"{key}={value} added to .env"
 
 
 def get_wallet_info_by_name(wallet_name):
